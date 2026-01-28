@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "Week1Demo",
+    "name": "Week2Demo",
     "type": "plc-project"
   },
   "data": {
@@ -25,7 +25,6 @@
         ],
         "globalVariables": []
       }
-    },
-    "deletedPous": []
+    }
   }
 }
