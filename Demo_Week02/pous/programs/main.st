@@ -7,7 +7,7 @@ VAR
 	outputs : P1_16TR;
 	lightRed : bool := False;
 	pump : bool := False;
-	machineState : DINT := 0; 
+	machineState : dint := 0;
 	timeOn : time := T#1000ms;
 	timeOff : time := T#1000ms;
 	timeTarget : time := T#1000ms;
