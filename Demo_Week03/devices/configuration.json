@@ -2,6 +2,7 @@
   "deviceBoard": "P1AM-100",
   "communicationPort": "COM3",
   "runtimeIpAddress": "",
+  "compileOnly": false,
   "communicationConfiguration": {
     "modbusRTU": {
       "rtuInterface": "Serial",

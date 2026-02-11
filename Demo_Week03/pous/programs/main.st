@@ -4,14 +4,19 @@ VAR
 	inputBlock : P1_16N;
 	outputBlock : P1_16TR;
 	analogInputBlock : P1_04AD;
-	thermistor : UINT;
+	thermistor : uint;
 	valveInlet : bool;
 	valveOutlet : bool;
 	heaterTank : bool;
-  pumpMixing : bool;
-	machineState : DINT := 0;
+	pumpMixing : bool;
+	machineState : dint := 0;
 	switchValve : bool;
 	switchFloat : bool;
+	targetTemp : uint := 8000;
+	trackedTemp : uint := 12000;
+	timerFill : TON;
+	timerTemp : TON;
+	countSwitch : CTU;
 END_VAR
 
 initBlock (INIT := TRUE);
@@ -30,9 +35,16 @@ case machineState of
   valveOutlet := False;
   heaterTank := False;
   pumpMixing := False;
-  if switchValve then
+  countSwitch (CU := switchValve,R := False,PV := 6);
+  if countSwitch.Q then
+    //countSwitch.R = True; // This won't actually reset the counter right now
+    //countSwitch(); // This would finish reseting the counter
+    countSwitch (R := TRUE);
     machineState := 10;
   end_if;
+  //if switchValve then
+  //  machineState := 10;
+  //end_if;
 10:(*Fill*)
   valveInlet := TRUE;
   timerFill (
@@ -45,9 +57,23 @@ case machineState of
     valveInlet := False;
   end_if;
 20:(*Mixing*)
-  valveOutlet := TRUE;
+  heaterTank := True;
+  pumpMixing := True;
+  trackedTemp := min(trackedTemp, thermistor);
+  timerTemp(IN:=targetTemp > trackedTemp, PT:= T#3s);
+  if timerTemp.Q then
+    trackedTemp := 12000;
+    heaterTank := False;
+    pumpMixing := False;
+    machineState := 30;
+  end_if;
+
 30:(*Empty*)
-  valveInlet := TRUE;
+    valveOutlet := True;
+    if switchFloat then
+      valveOutlet := False;
+      machineState := 0;
+    end_if;
 end_case;
 
 END_PROGRAM
