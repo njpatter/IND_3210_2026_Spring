@@ -24,11 +24,16 @@ VAR
 	futureState : int := 10;
 	hCounter : CTU;
 	vCounter : CTU;
-	targetV : INT := 30;
-	targetH : INT := 20;
-	incV : INT;
-	incH : INT;
-	delta : INT := 15;
+	targetV : int := 30;
+	targetConveyorVertical :INT := 200;
+	targetH : int := 20;
+	incV : int := 50;
+	incH : int := 10;
+	initialV : int := 10;
+	initialH : int := 140;
+	delta : int := 15;
+	isCrateFilled : ARRAY[0..8] of bool;
+	i : INT := 0;
 END_VAR
 
 initBlock (INIT := TRUE);
@@ -48,6 +53,7 @@ case machineState of
 //      Retract arm
 //      Horizontal home
 //      Vertical home
+// Set targets when appropriate!
   armBack := not bArmB;
   if bArmB then
     hBack := not bH;
@@ -55,6 +61,15 @@ case machineState of
   end_if;
   if bArmB and bH and bV then
     machineState := futureState;
+    if futureState = 10 then
+      for i:=0 to 8 do
+        if not isCrateFilled[i] then
+          exit;
+        end_if;
+      end_for;
+      targetH := initialH + incH * MOD (IN1 := i,IN2 := 3);
+      targetV := initialV + incV * i / 3;
+    end_if;
   end_if;
 
 10: 
@@ -98,7 +113,7 @@ case machineState of
 //      Move down to conveyor and out
   armFwd := not bArmF;
   vDown := True;
-  vCounter(CU:= encV, R:=False, PV:= 100);
+  vCounter(CU:= encV, R:=False, PV:= targetConveyorVertical);
   if vCounter.Q then
     vDown := False;
   end_if;
@@ -121,11 +136,12 @@ case machineState of
     machineState := 70;
   end_if; 
 70:
-  vUp := True;
   // Return filled crate to prev pos
+  // Move up a little to pick up crate
   //      Retract arm
   //      Home vert
-  vCounter(CU:= encV, R:= False, PV := delta);
+  vUp := True;
+  vCounter(CU:= encV, R:= False, PV := targetConveyorVertical - 10);
   if vCounter.Q then
     vUp := False;
     vCounter(R:= True);
@@ -133,24 +149,44 @@ case machineState of
     futureState:= 80;
   end_if;
 80: 
-  targetV := 10;
+//      Move to horiz pos
+  hFwd := True;
+  hCounter (CU := encH,R := FALSE,PV := targetH);
+  if hCounter.Q then
+    hFwd := FALSE;
+    machineState := 90;
+    hCounter ( R := True );
+  end_if;
+90: 
+//      Move to vert pos 
+  vDown := True;
+  vCounter (CU := encV,R := FALSE,PV := targetV - delta);
+  if vCounter.Q then
+    vDown := False;
+    vCounter ( R := True);
+    machineState := 100;
+  end_if;
+100:
+//      Extend arm
+//      Move down a little
+  armFwd := not bArmF;
+  if bArmF then
+    vDown := not vCounter.Q;
+    vCounter (CU := encV,R := FALSE,PV := delta);
+    if vCounter.Q then
+      vDown := False;
+      vCounter ( R := True);
+      isCrateFilled[i] := True;
+      machineState := 0;
+      futureState := 10;
+    end_if;
+  end_if; 
 end_case;
 
 
 
 
-
-
-
-
-//      Move to horiz pos
-//      Move to vert pos
-//      Extend arm
-//      Move down a little
 //      Retract arm
 // Home again
-
-
-
 
 END_PROGRAM
