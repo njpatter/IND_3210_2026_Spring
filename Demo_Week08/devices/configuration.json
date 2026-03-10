@@ -1,6 +1,6 @@
 {
-  "deviceBoard": "",
-  "communicationPort": "",
+  "deviceBoard": "P1AM-100",
+  "communicationPort": "COM4",
   "runtimeIpAddress": "",
   "compileOnly": false,
   "communicationConfiguration": {
@@ -11,10 +11,8 @@
       "rtuRS485ENPin": null
     },
     "modbusTCP": {
-      "tcpInterface": "Wi-Fi",
-      "tcpMacAddress": null,
-      "tcpWifiSSID": null,
-      "tcpWifiPassword": null,
+      "tcpInterface": "Ethernet",
+      "tcpMacAddress": "DE:AD:BE:EF:DE:AD",
       "tcpStaticHostConfiguration": {
         "ipAddress": "",
         "dns": "",
@@ -25,7 +23,7 @@
     "communicationPreferences": {
       "enabledRTU": false,
       "enabledTCP": false,
-      "enabledDHCP": false
+      "enabledDHCP": true
     }
   }
 }
