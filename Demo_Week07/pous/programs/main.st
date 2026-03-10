@@ -24,9 +24,9 @@ VAR
 	futureState : int := 10;
 	hCounter : CTU;
 	vCounter : CTU;
-	targetV : int := 30;
+	targetV : int ;
 	targetConveyorVertical :INT := 200;
-	targetH : int := 20;
+	targetH : int ;
 	incV : int := 50;
 	incH : int := 10;
 	initialV : int := 10;
