@@ -24,16 +24,16 @@ VAR
 	futureState : int := 10;
 	hCounter : CTU;
 	vCounter : CTU;
-	targetV : int ;
-	targetConveyorVertical :INT := 200;
-	targetH : int ;
+	targetV : int;
+	targetConveyorVertical : int := 200;
+	targetH : int;
 	incV : int := 50;
 	incH : int := 10;
 	initialV : int := 10;
 	initialH : int := 140;
 	delta : int := 15;
 	isCrateFilled : ARRAY[0..8] of bool;
-	i : INT := 0;
+	i : int := 0;
 END_VAR
 
 initBlock (INIT := TRUE);
@@ -44,12 +44,10 @@ outputBlock (SLOT := 2,O1 := convFwd,O2 := convBack,O3 := hFwd,O4 := hBack,
     O5 := vDown,O6 := vUp,O7 := armFwd,O8 := armBack);
 
 
-// customBoolArray : ARRAY[0..7] OF BOOL;
-
 
 case machineState of
 0:
-// Home machine
+// Home machine - In this state we move motors and watch switches
 //      Retract arm
 //      Horizontal home
 //      Vertical home
@@ -73,8 +71,8 @@ case machineState of
   end_if;
 
 10: 
-// Deliver first empty crate to conveyor
-//      Move to horiz pos
+// Deliver first empty crate to conveyor 
+//      Move to horiz pos - In this state, we move the horizontal encoder motor a specific amount
   hFwd := True;
   hCounter (CU := encH,R := FALSE,PV := targetH);
   if hCounter.Q then
@@ -84,7 +82,7 @@ case machineState of
   end_if;
 
 20:
-//      Move to vert pos
+//      Move to vert pos - In this state, we move the vertical encoder motor a specific amount
   vDown := True;
   vCounter (CU := encV,R := FALSE,PV := targetV);
   if vCounter.Q then
@@ -93,7 +91,7 @@ case machineState of
     machineState := 30;
   end_if;
 30:
-  //      Extend arm
+  //      Extend arm - In this state we extend the arm, then we move the vertical up a little
   armFwd := not bArmF;
   if bArmF then
     //      Move up small amt
@@ -110,7 +108,7 @@ case machineState of
     end_if;
   end_if;
 40: 
-//      Move down to conveyor and out
+//      Move down to conveyor and out - In this state we drop the crate off on the conveyor
   armFwd := not bArmF;
   vDown := True;
   vCounter(CU:= encV, R:=False, PV:= targetConveyorVertical);
@@ -123,20 +121,20 @@ case machineState of
   end_if;
 
 50:
-//      Move conveyor fwd
+//      Move conveyor fwd - Move the conveyor forward and watch for signal from pickup station
   convFwd := lbOut;
   // Wait for robot arm
-  if not lbOut  then //and signalFromPickupStation
+  if not lbOut and signalFromPickupStation then
     machineState := 60;
   end_if;
 60:
-  //      Move conveyor back
+  //      Move conveyor back - Move the conveyor back, now with puck inside!
   convBack := lbIn;
   if not lbIn then
     machineState := 70;
   end_if; 
 70:
-  // Return filled crate to prev pos
+  // Return filled crate to prev pos - Same motions as earlier, just in reverse
   // Move up a little to pick up crate
   //      Retract arm
   //      Home vert
@@ -185,8 +183,5 @@ end_case;
 
 
 
-
-//      Retract arm
-// Home again
 
 END_PROGRAM
